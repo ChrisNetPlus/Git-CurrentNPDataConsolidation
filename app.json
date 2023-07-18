@@ -1,0 +1,43 @@
+{
+  "id": "2c9fe188-a199-5ad1-9e1d-a061e8e3df0f",
+  "name": "NP Data Consolidation",
+  "publisher": "Network Plus",
+  "version": "1.0.0.32",
+  "brief": "",
+  "description": "",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [
+    {
+      "id": "2c9fe188-a199-4ad1-9e1d-a081e8e2cf0e",
+      "name": "Dimension Combinations",
+      "version": "1.1.0.5",
+      "publisher": "Network Plus"
+    },
+    {
+      "id": "0edc72a6-fe76-46a8-822c-c42a28cb5fa5",
+      "name": "Construction Industry Scheme",
+      "version": "22.0.0.0",
+      "publisher": "MERCURIUS IT LTD"
+    },
+    {
+      "id": "2c9fe188-a199-4ad1-9e1d-a061e8e2df0f",
+      "name": "Daily Tips",
+      "version": "1.1.0.6",
+      "publisher": "Network Plus"
+    }
+  ],
+  "screenshots": [],
+  "platform": "1.0.0.0",
+  "application": "20.0.0.0",
+  "idRanges": [
+    {
+      "from": 50430,
+      "to": 50460
+    }
+  ],
+  "runtime": "9.0"
+}
