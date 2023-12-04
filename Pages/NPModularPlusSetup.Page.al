@@ -1,6 +1,6 @@
 page 50451 "NP Modular Plus Setup"
 {
-    Caption = 'Modular Plus Setup';
+    Caption = 'Data Consolidation Setup';
     PageType = Card;
     SourceTable = "NP Modular Plus Setup";
     UsageCategory = Administration;
@@ -28,7 +28,38 @@ page 50451 "NP Modular Plus Setup"
                     ToolTip = 'Specifies the value of the Password field.';
                 }
             }
+            group(Defaults)
+            {
+                AboutText = 'Record Types to Control';
+                AboutTitle = 'Record Types to Control';
+                field(Customers; Rec.Customers)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Switch on to control records centrally';
+                }
+                field(Vendors; Rec.Vendors)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Switch on to control records centrally';
+                }
+                field("GL Codes"; Rec."GL Codes")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Switch on to control records centrally';
+                }
+                field(Dimensions; Rec.Dimensions)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Switch on to control records centrally';
+                }
+                field(Items; Rec.Items)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Switch on to control records centrally';
+                }
+            }
         }
+
     }
     actions
     {

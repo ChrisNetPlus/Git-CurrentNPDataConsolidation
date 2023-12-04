@@ -59,6 +59,42 @@ codeunit 50430 "NP Data Consolidation"
             Message(CloseMessage, CompanyCount);
     end;
 
+    procedure UpdateVendorBank()
+    var
+        Company: Record Company;
+        CompanyInfo: Record "Company Information";
+        CompanyList: Record "NP Company List Update";
+        VendorBankAccount: Record "Vendor Bank Account";
+        NewVendorBankAccount: Record "Vendor Bank Account";
+        ErrorTxt: Label 'This function can only be used in the Master Data Company';
+        CloseMessage: Label '%1 records Updated';
+        CompanyCount: Integer;
+    begin
+        Clear(CompanyCount);
+        VendorBankAccount.SetRange("NP Consolidated", false);
+        if VendorBankAccount.FindSet() then
+            repeat
+                CompanyInfo.Get();
+                Company.Get(CompanyName);
+                if not CompanyInfo."NP Master Data Company" then
+                    Error(ErrorTxt);
+                CompanyList.SetRange(Update, true);
+                if CompanyList.FindSet() then
+                    repeat
+                        CompanyCount += 1;
+                        Clear(NewVendorBankAccount);
+                        NewVendorBankAccount.ChangeCompany(CompanyList."Company Name");
+                        NewVendorBankAccount.TransferFields(VendorBankAccount);
+                        NewVendorBankAccount."NP Consolidated" := true;
+                        if not NewVendorBankAccount.Insert() then
+                            NewVendorBankAccount.Modify();
+                        UpdateLog(CompanyList."Company Name", 'Vendor Bank', VendorBankAccount.Name, 'Update');
+                    Until CompanyList.Next() = 0;
+            until VendorBankAccount.Next() = 0;
+        if GuiAllowed then
+            Message(CloseMessage, CompanyCount);
+    end;
+
     procedure UpdateCustomer()
     var
         Company: Record Company;
@@ -99,15 +135,13 @@ codeunit 50430 "NP Data Consolidation"
             Message(CloseMessage, CompanyCount);
     end;
 
-    procedure UpdateGL()
+    procedure UpdateGLCode()
     var
         Company: Record Company;
         CompanyInfo: Record "Company Information";
         CompanyList: Record "NP Company List Update";
         GL: Record "G/L Account";
         NewGL: Record "G/L Account";
-        VendorBankAccount: Record "Vendor Bank Account";
-        NewVendorBankAccount: Record "Vendor Bank Account";
         ErrorTxt: Label 'This function can only be used in the Master Data Company';
         CloseMessage: Label '%1 records Updated';
         CompanyCount: Integer;
@@ -130,10 +164,8 @@ codeunit 50430 "NP Data Consolidation"
                         NewGL."NP Consolidated" := true;
                         if not NewGL.Insert() then
                             NewGL.Modify();
-                        UpdateLog(CompanyList."Company Name", 'GL Code', GL."No.", 'Update');
+                        UpdateLog(CompanyList."Company Name", 'GL Account', GL.Name, 'Update');
                     Until CompanyList.Next() = 0;
-                GL."NP Consolidated" := true;
-                GL.Modify();
             until GL.Next() = 0;
         if GuiAllowed then
             Message(CloseMessage, CompanyCount);
@@ -203,6 +235,7 @@ codeunit 50430 "NP Data Consolidation"
         CompanyCount: Integer;
     begin
         Clear(CompanyCount);
+        DimValue.Reset();
         DimValue.SetRange("NP Consolidated", false);
         if DimValue.FindSet() then
             repeat
@@ -225,13 +258,6 @@ codeunit 50430 "NP Data Consolidation"
                 DimValue."NP Consolidated" := true;
                 DimValue.Modify();
             until DimValue.Next() = 0;
-        if ContractWorkstreams.FindSet() then
-            repeat
-                NewContractWorkstreams.ChangeCompany(CompanyList."Company Name");
-                NewContractWorkstreams.TransferFields(ContractWorkstreams);
-                if not NewContractWorkstreams.Insert() then
-                    NewContractWorkstreams.Modify();
-            until ContractWorkstreams.Next() = 0;
         if GuiAllowed then
             Message(CloseMessage, CompanyCount);
     end;
@@ -276,27 +302,79 @@ codeunit 50430 "NP Data Consolidation"
     procedure CopyVendorData(var Vendor: Record Vendor; Company: Text[50]; Deleted: Boolean)
     var
         ModPlusVendor: Record "NP Modular Plus Vendors";
+        VenBankAcc: Record "Vendor Bank Account";
+        CompanyInfo: Record "Company Information";
+        VendorRec: Record Vendor;
     begin
-        ModPlusVendor.Init();
-        ModPlusVendor.Company := Company;
-        ModPlusVendor."Vendor No." := Vendor."No.";
-        ModPlusVendor.Name := Vendor.Name;
-        ModPlusVendor.Address := Vendor.Address;
-        ModPlusVendor."Address 2" := Vendor."Address 2";
-        ModPlusVendor.City := Vendor.City;
-        ModPlusVendor.County := Vendor.County;
-        ModPlusVendor."Post Code" := Vendor."Post Code";
-        ModPlusVendor.Contact := Vendor.Contact;
-        ModPlusVendor."E-Mail" := Vendor."E-Mail";
-        ModPlusVendor."Home Page" := Vendor."Home Page";
-        ModPlusVendor."Phone No." := Vendor."Phone No.";
-        ModPlusVendor."Mobile Phone No." := Vendor."Mobile Phone No.";
-        ModPlusVendor."Primary Contact No." := Vendor."Primary Contact No.";
-        ModPlusVendor."Vendor Type" := Format(Vendor."MCI Vendor Type");
-        ModPlusVendor."Company Registration No." := Vendor."NP Company Registration No.";
-        ModPlusVendor.Deleted := Deleted;
-        if not ModPlusVendor.Insert() then
-            ModPlusVendor.Modify();
+        if CompanyInfo."NP Master Data Company" = false then begin
+            ModPlusVendor.Init();
+            ModPlusVendor.Address := Vendor.Address;
+            ModPlusVendor."Address 2" := Vendor."Address 2";
+            ModPlusVendor."Vendor No." := Vendor."No.";
+            ModPlusVendor.Name := Vendor.Name;
+            ModPlusVendor.Company := CompanyName;
+            ModPlusVendor.City := Vendor.City;
+            ModPlusVendor."Company Registration No." := Vendor."NP Company Registration No.";
+            ModPlusVendor.Contact := Vendor.Contact;
+            ModPlusVendor.County := Vendor.County;
+            ModPlusVendor."E-Mail" := Vendor."E-Mail";
+            ModPlusVendor."Home Page" := Vendor."Home Page";
+            ModPlusVendor."Mobile Phone No." := Vendor."Mobile Phone No.";
+            ModPlusVendor."Phone No." := Vendor."Phone No.";
+            ModPlusVendor."Post Code" := Vendor."Post Code";
+            ModPlusVendor."Primary Contact No." := Vendor."Primary Contact No.";
+            ModPlusVendor."Gen. Bus. Posting Group" := Vendor."Gen. Bus. Posting Group";
+            ModPlusVendor."VAT Bus. Posting Group" := Vendor."VAT Bus. Posting Group";
+            ModPlusVendor."Vendor Posting Group" := Vendor."Vendor Posting Group";
+            ModPlusVendor."AP Contact" := Vendor."AP Contact";
+            ModPlusVendor.NPSCL := Vendor."NP NPSCL";
+            ModPlusVendor."Insurance Broker" := Vendor."NP Insurance Broker";
+            ModPlusVendor."Value Insured" := Vendor."NP Value Insured";
+            ModPlusVendor."Payment Terms Code" := Vendor."Payment Terms Code";
+            VenBankAcc.Reset();
+            VenBankAcc.SetRange("Vendor No.", Vendor."No.");
+            if VenBankAcc.FindFirst() then begin
+                ModPlusVendor."Bank Acc. Code" := VenBankAcc.Code;
+                ModPlusVendor."Bank Account No." := VenBankAcc."Bank Account No.";
+                ModPlusVendor."Bank Branch No." := VenBankAcc."Bank Branch No.";
+                ModPlusVendor."Bank Name" := VenBankAcc.Name;
+            end;
+            if not ModPlusVendor.Insert() then
+                ModPlusVendor.Modify();
+        end;
+    end;
+
+    procedure CopyCustomerData(var Customer: Record Customer; Company: Text[50]; Deleted: Boolean)
+    var
+        NPCustomers: Record "NP Customers";
+        CompanyInfo: Record "Company Information";
+        CustomerRec: Record Customer;
+    begin
+        if CompanyInfo."NP Master Data Company" = false then begin
+            NPCustomers.Init();
+            NPCustomers.Company := CompanyName;
+            NPCustomers.Address := Customer.Address;
+            NPCustomers."Address 2" := Customer."Address 2";
+            NPCustomers."Customer No." := Customer."No.";
+            NPCustomers.Name := Customer.Name;
+            NPCustomers."InspHire Cust. No." := Customer."InspHire Customer No.";
+            NPCustomers.City := Customer.City;
+            NPCustomers."Company Registration No." := Customer."Registration Number";
+            NPCustomers.Contact := Customer.Contact;
+            NPCustomers.County := Customer.County;
+            NPCustomers."E-Mail" := Customer."E-Mail";
+            NPCustomers."Home Page" := Customer."Home Page";
+            NPCustomers."Mobile Phone No." := Customer."Mobile Phone No.";
+            NPCustomers."Phone No." := Customer."Phone No.";
+            NPCustomers."Post Code" := Customer."Post Code";
+            NPCustomers."Primary Contact No." := Customer."Primary Contact No.";
+            NPCustomers."Gen. Bus. Posting Group" := Customer."Gen. Bus. Posting Group";
+            NPCustomers."VAT Bus. Posting Group" := Customer."VAT Bus. Posting Group";
+            NPCustomers."Customer Posting Group" := Customer."Customer Posting Group";
+            NPCustomers."Payment Terms Code" := Customer."Payment Terms Code";
+            if not NPCustomers.Insert() then
+                NPCustomers.Modify();
+        end;
     end;
 
     procedure UpdateVendors()
@@ -311,8 +389,10 @@ codeunit 50430 "NP Data Consolidation"
     begin
         Clear(CompanyCount);
         CompanyInfo.Get();
-        if CompanyInfo."NP Data Company" = '' then
-            Error(ErrorMessage);
+        if not CompanyInfo."NP Master Data Company" = true then begin
+            if CompanyInfo."NP Data Company" = '' then
+                Error(ErrorMessage);
+        end;
         if GuiAllowed then
             Window.Open('##1####################');
         if ModPlusVendor.FindSet() then
@@ -321,11 +401,45 @@ codeunit 50430 "NP Data Consolidation"
                 if GuiAllowed then
                     Window.Update(1, ModPlusVendor."Vendor No.");
                 DataModPlusVendor.ChangeCompany(CompanyInfo."NP Data Company");
-                DataModPlusVendor.TransferFields(ModPlusVendor, true);
+                DataModPlusVendor.TransferFields(ModPlusVendor);
                 if not DataModPlusVendor.Insert() then
                     DataModPlusVendor.Modify(false);
                 Commit();
             Until ModPlusVendor.Next() = 0;
+        if GuiAllowed then
+            Message('Transfer Complete');
+        Window.Close();
+    end;
+
+    procedure UpdateCustomers()
+    var
+        Company: Record Company;
+        CompanyInfo: Record "Company Information";
+        NPCustomers: Record "NP Customers";
+        DataNPCustomers: Record "NP Customers";
+        CompanyCount: Integer;
+        Window: Dialog;
+        ErrorMessage: Label 'The Master Data Company must be selected in the Company Information';
+    begin
+        Clear(CompanyCount);
+        CompanyInfo.Get();
+        if not CompanyInfo."NP Master Data Company" = true then begin
+            if CompanyInfo."NP Data Company" = '' then
+                Error(ErrorMessage);
+        end;
+        if GuiAllowed then
+            Window.Open('##1####################');
+        if NPCustomers.FindSet() then
+            repeat
+                Clear(DataNPCustomers);
+                if GuiAllowed then
+                    Window.Update(1, NPCustomers."Customer No.");
+                DataNPCustomers.ChangeCompany(CompanyInfo."NP Data Company");
+                DataNPCustomers.TransferFields(NPCustomers);
+                if not DataNPCustomers.Insert() then
+                    DataNPCustomers.Modify(false);
+                Commit();
+            Until NPCustomers.Next() = 0;
         if GuiAllowed then
             Message('Transfer Complete');
         Window.Close();
@@ -340,88 +454,232 @@ codeunit 50430 "NP Data Consolidation"
         CompanyCount: Integer;
     begin
         CompanyInfo.Get();
-        ModPlusVendor.SetRange("Vendor No.", Vendor."No.");
-        ModPlusVendor.SetRange(Company, CompanyName);
-        if ModPlusVendor.FindFirst() then begin
-            Clear(DataModPlusVendor);
-            DataModPlusVendor.ChangeCompany(CompanyInfo."NP Data Company");
-            DataModPlusVendor.TransferFields(ModPlusVendor);
-            if not DataModPlusVendor.Insert() then
-                DataModPlusVendor.Modify();
-        end else begin
-            Clear(DataModPlusVendor);
-            DataModPlusVendor.ChangeCompany(CompanyInfo."NP Data Company");
-            DataModPlusVendor.TransferFields(ModPlusVendor);
-            if not DataModPlusVendor.Insert() then
-                DataModPlusVendor.Modify();
+        if not CompanyInfo."NP Master Data Company" = true then begin
+            ModPlusVendor.SetRange("Vendor No.", Vendor."No.");
+            ModPlusVendor.SetRange(Company, CompanyName);
+            if ModPlusVendor.FindFirst() then begin
+                Clear(DataModPlusVendor);
+                DataModPlusVendor.ChangeCompany(CompanyInfo."NP Data Company");
+                DataModPlusVendor.TransferFields(ModPlusVendor);
+                if not DataModPlusVendor.Insert() then
+                    DataModPlusVendor.Modify();
+            end else begin
+                Clear(DataModPlusVendor);
+                DataModPlusVendor.ChangeCompany(CompanyInfo."NP Data Company");
+                DataModPlusVendor.TransferFields(ModPlusVendor);
+                if not DataModPlusVendor.Insert() then
+                    DataModPlusVendor.Modify();
+            end;
         end;
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"NP Contract Workstreams", 'OnAfterInsertEvent', '', false, false)]
-    local procedure InsertContractWorkstreams(var Rec: Record "NP Contract Workstreams")
+    procedure CreateMasterDataRecords()
     var
-        CompanyInfo: Record "Company Information";
+        VendorDataList: Record "NP Modular Plus Vendors";
+        Vendor: Record Vendor;
+        VendorBank: Record "Vendor Bank Account";
+        Window: Dialog;
     begin
-        CompanyInfo.Get();
-        if CompanyInfo."NP Enable Manual Data Upload" = false then
-            ChangeDimensionWorkstreamValue(Rec);
+        Window.Open('##1####################');
+        if VendorDataList.FindSet() then
+            repeat
+                Window.Update(1, VendorDataList."Vendor No.");
+                Vendor.Init();
+                Vendor."No." := VendorDataList."Vendor No.";
+                Vendor.Name := VendorDataList.Name;
+                Vendor."NP Company Name" := VendorDataList.Company;
+                Vendor.Address := VendorDataList.Address;
+                Vendor."Address 2" := VendorDataList."Address 2";
+                Vendor.City := VendorDataList.City;
+                Vendor.County := VendorDataList.County;
+                Vendor."Post Code" := VendorDataList."Post Code";
+                Vendor."Primary Contact No." := VendorDataList."Primary Contact No.";
+                Vendor.Contact := VendorDataList.Contact;
+                Vendor."Phone No." := VendorDataList."Phone No.";
+                Vendor."Mobile Phone No." := VendorDataList."Mobile Phone No.";
+                Vendor."E-Mail" := VendorDataList."E-Mail";
+                Vendor."Home Page" := VendorDataList."Home Page";
+                Vendor."Gen. Bus. Posting Group" := VendorDataList."Gen. Bus. Posting Group";
+                Vendor."VAT Bus. Posting Group" := VendorDataList."VAT Bus. Posting Group";
+                Vendor."Vendor Posting Group" := VendorDataList."Vendor Posting Group";
+                Vendor."NP Company Registration No." := VendorDataList."Company Registration No.";
+                if VendorDataList."Vendor Type" = 'Subcontractor Only' then
+                    Vendor."MCI Vendor Type" := Vendor."MCI Vendor Type"::"Subcontractor Only"
+                else
+                    if VendorDataList."Vendor Type" = 'Vendor Only' then
+                        Vendor."MCI Vendor Type" := Vendor."MCI Vendor Type"::"Vendor Only"
+                    else
+                        if VendorDataList."Vendor Type" = 'Vendor and Subcontractor' then
+                            Vendor."MCI Vendor Type" := Vendor."MCI Vendor Type"::"Vendor and Subcontractor";
+                Vendor."NP NPSCL" := VendorDataList.NPSCL;
+                Vendor."NP Insurance Broker" := VendorDataList."Insurance Broker";
+                Vendor."NP Value Insured" := VendorDataList."Value Insured";
+                Vendor."NP Consolidated" := true;
+                Vendor."Payment Terms Code" := VendorDataList."Payment Terms Code";
+                If not Vendor.Insert() then
+                    Vendor.Modify();
+                Commit();
+                VendorBank.Init();
+                VendorBank."Vendor No." := VendorDataList."Vendor No.";
+                VendorBank.Code := VendorDataList."Bank Acc. Code";
+                VendorBank.Name := VendorDataList."Bank Name";
+                VendorBank."Bank Account No." := VendorDataList."Bank Account No.";
+                VendorBank."Bank Branch No." := VendorDataList."Bank Branch No.";
+                if not VendorBank.Insert() then
+                    VendorBank.Modify();
+                VendorDataList.Delete();
+            until VendorDataList.Next() = 0;
+        Window.Close();
     end;
 
-    [EventSubscriber(ObjectType::Table, Database::"NP Contract Workstreams", 'OnAfterValidateEvent', 'Description', false, false)]
-    local procedure ModifyContractWorkstreams(var Rec: Record "NP Contract Workstreams")
+    procedure CreateCustDataRecords()
     var
-        CompanyInfo: Record "Company Information";
+        CustDataList: Record "NP Customers";
+        Customer: Record Customer;
+        Window: Dialog;
     begin
-        CompanyInfo.Get();
-        if CompanyInfo."NP Enable Manual Data Upload" = false then
-            ChangeDimensionWorkstreamValue(Rec);
+        Window.Open('##1####################');
+        if CustDataList.FindSet() then
+            repeat
+                Window.Update(1, CustDataList."Customer No.");
+                Customer.Init();
+                Customer."No." := CustDataList."Customer No.";
+                Customer.Name := CustDataList.Name;
+                Customer."NP Company Name" := CustDataList.Company;
+                Customer.Address := CustDataList.Address;
+                Customer."Address 2" := CustDataList."Address 2";
+                Customer.City := CustDataList.City;
+                Customer.County := CustDataList.County;
+                Customer."Post Code" := CustDataList."Post Code";
+                Customer."Primary Contact No." := CustDataList."Primary Contact No.";
+                Customer.Contact := CustDataList.Contact;
+                Customer."Phone No." := CustDataList."Phone No.";
+                Customer."Mobile Phone No." := CustDataList."Mobile Phone No.";
+                Customer."E-Mail" := CustDataList."E-Mail";
+                Customer."Home Page" := CustDataList."Home Page";
+                Customer."Registration Number" := CustDataList."Company Registration No.";
+                Customer."NP Consolidated" := true;
+                Customer."Gen. Bus. Posting Group" := CustDataList."Gen. Bus. Posting Group";
+                Customer."VAT Bus. Posting Group" := CustDataList."VAT Bus. Posting Group";
+                Customer."Customer Posting Group" := CustDataList."Customer Posting Group";
+                Customer."Payment Terms Code" := CustDataList."Payment Terms Code";
+                If not Customer.Insert() then
+                    Customer.Modify();
+                Commit();
+                CustDataList.Delete();
+            until CustDataList.Next() = 0;
+        Window.Close();
     end;
 
-    procedure ChangeDimensionWorkstreamValue(Dimension: Record "NP Contract Workstreams")
+    procedure MarkUpdated()
     var
-        CompanyInfo: Record "Company Information";
-        NewDimValue: Record "NP Contract Workstreams";
+        GL: Record "G/L Account";
+        Cust: Record Customer;
+        Vend: Record Vendor;
+        Item: Record Item;
+        DimValue: Record "Dimension Value";
     begin
-        CompanyInfo.Get();
-        Clear(NewDimValue);
-        NewDimValue.ChangeCompany(CompanyInfo."NP Data Company");
-        // NewDimValue.TransferFields(Dimension, false);
-        NewDimValue."Contract Code" := Dimension."Contract Code";
-        NewDimValue."Workstream Code" := Dimension."Workstream Code";
-        NewDimValue.Description := Dimension.Description;
-        if not NewDimValue.Insert() then
-            NewDimValue.Modify();
+        GL.Reset();
+        GL.SetRange("NP Consolidated", false);
+        if GL.FindSet() then
+            repeat
+                GL."NP Consolidated" := true;
+                GL.Modify();
+            until GL.Next() = 0;
+        Cust.Reset();
+        Cust.SetRange("NP Consolidated", false);
+        if Cust.FindSet() then
+            repeat
+                Cust."NP Consolidated" := true;
+                Cust.Modify();
+            until Cust.Next() = 0;
+        Vend.Reset();
+        Vend.SetRange("NP Consolidated", false);
+        if Vend.FindSet() then
+            repeat
+                Vend."NP Consolidated" := true;
+                Vend.Modify();
+            until Vend.Next() = 0;
+        Item.Reset();
+        Item.SetRange("NP Consolidated", false);
+        if Item.FindSet() then
+            repeat
+                Item."NP Consolidated" := true;
+                Item.Modify();
+            until Item.Next() = 0;
+        Item.Reset();
+        DimValue.SetRange("NP Consolidated", false);
+        if DimValue.FindSet() then
+            repeat
+                DimValue."NP Consolidated" := true;
+                DimValue.Modify();
+            until DimValue.Next() = 0;
     end;
+    // [EventSubscriber(ObjectType::Table, Database::"NP Contract Workstreams", 'OnAfterInsertEvent', '', false, false)]
+    // local procedure InsertContractWorkstreams(var Rec: Record "NP Contract Workstreams")
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Enable Manual Data Upload" = false then
+    //         ChangeDimensionWorkstreamValue(Rec);
+    // end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Dimension Value", 'OnAfterInsertEvent', '', false, false)]
-    local procedure InsertDimension(var Rec: Record "Dimension Value")
-    var
-        CompanyInfo: Record "Company Information";
-    begin
-        CompanyInfo.Get();
-        if CompanyInfo."NP Enable Manual Data Upload" = false then
-            ChangeDimensionValue(Rec);
-    end;
+    // [EventSubscriber(ObjectType::Table, Database::"NP Contract Workstreams", 'OnAfterValidateEvent', 'Description', false, false)]
+    // local procedure ModifyContractWorkstreams(var Rec: Record "NP Contract Workstreams")
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Enable Manual Data Upload" = false then
+    //         ChangeDimensionWorkstreamValue(Rec);
+    // end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Dimension Value", 'OnAfterValidateEvent', 'Name', false, false)]
-    local procedure ModifyDimension(var Rec: Record "Dimension Value"; var xRec: Record "Dimension Value")
-    var
-        CompanyInfo: Record "Company Information";
-    begin
-        CompanyInfo.Get();
-        if CompanyInfo."NP Enable Manual Data Upload" = false then
-            ChangeDimensionValue(Rec);
-    end;
+    // procedure ChangeDimensionWorkstreamValue(Dimension: Record "NP Contract Workstreams")
+    // var
+    //     CompanyInfo: Record "Company Information";
+    //     NewDimValue: Record "NP Contract Workstreams";
+    // begin
+    //     CompanyInfo.Get();
+    //     Clear(NewDimValue);
+    //     NewDimValue.ChangeCompany(CompanyInfo."NP Data Company");
+    //     // NewDimValue.TransferFields(Dimension, false);
+    //     NewDimValue."Contract Code" := Dimension."Contract Code";
+    //     NewDimValue."Workstream Code" := Dimension."Workstream Code";
+    //     NewDimValue.Description := Dimension.Description;
+    //     if not NewDimValue.Insert() then
+    //         NewDimValue.Modify();
+    // end;
 
-    [EventSubscriber(ObjectType::Table, Database::"Dimension Value", 'OnAfterValidateEvent', 'Dimension Value Type', false, false)]
-    local procedure ModifyDimension2(var Rec: Record "Dimension Value")
-    var
-        CompanyInfo: Record "Company Information";
-    begin
-        CompanyInfo.Get();
-        if CompanyInfo."NP Enable Manual Data Upload" = false then
-            ChangeDimensionValue(Rec);
-    end;
+    // [EventSubscriber(ObjectType::Table, Database::"Dimension Value", 'OnAfterInsertEvent', '', false, false)]
+    // local procedure InsertDimension(var Rec: Record "Dimension Value")
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Enable Manual Data Upload" = false then
+    //         ChangeDimensionValue(Rec);
+    // end;
+
+    // [EventSubscriber(ObjectType::Table, Database::"Dimension Value", 'OnAfterValidateEvent', 'Name', false, false)]
+    // local procedure ModifyDimension(var Rec: Record "Dimension Value"; var xRec: Record "Dimension Value")
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Enable Manual Data Upload" = false then
+    //         ChangeDimensionValue(Rec);
+    // end;
+
+    // [EventSubscriber(ObjectType::Table, Database::"Dimension Value", 'OnAfterValidateEvent', 'Dimension Value Type', false, false)]
+    // local procedure ModifyDimension2(var Rec: Record "Dimension Value")
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Enable Manual Data Upload" = false then
+    //         ChangeDimensionValue(Rec);
+    // end;
 
     procedure ChangeDimensionValue(Dimension: Record "Dimension Value")
     var
@@ -430,15 +688,15 @@ codeunit 50430 "NP Data Consolidation"
     begin
         CompanyInfo.Get();
         begin
-            Clear(NewDimValue);
-            NewDimValue.ChangeCompany(CompanyInfo."NP Data Company");
-            NewDimValue."Dimension Code" := Dimension."Dimension Code";
-            NewDimValue.Code := Dimension.Code;
-            NewDimValue.Name := Dimension.Name;
-            NewDimValue."Dimension Value ID" := Dimension."Dimension Value ID";
-            NewDimValue."Dimension Value Type" := Dimension."Dimension Value Type";
-            if not NewDimValue.Insert(false) then
-                NewDimValue.Modify(false);
+            // Clear(NewDimValue);
+            // NewDimValue.ChangeCompany(CompanyInfo."NP Data Company");
+            // NewDimValue."Dimension Code" := Dimension."Dimension Code";
+            // NewDimValue.Code := Dimension.Code;
+            // NewDimValue.Name := Dimension.Name;
+            // NewDimValue."Dimension Value ID" := Dimension."Dimension Value ID";
+            // NewDimValue."Dimension Value Type" := Dimension."Dimension Value Type";
+            // if not NewDimValue.Insert(false) then
+            //     NewDimValue.Modify(false);
         end;
     end;
 
@@ -559,30 +817,34 @@ codeunit 50430 "NP Data Consolidation"
         end;
     end;
 
+    // [EventSubscriber(ObjectType::Table, Database::Vendor, 'OnBeforeInsertEvent', '', false, false)]
+    // local procedure CheckDataCo()
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Master Data Company" = false then
+    //         Error('Inserts only allowed in the Data Company');
+    // end;
 
-    [EventSubscriber(ObjectType::Table, Database::Vendor, 'OnAfterInsertEvent', '', false, false)]
-    local procedure SendInsert(var Rec: Record Vendor)
-    begin
-        CopyVendorData(Rec, CompanyName, false);
-        InsertModPlusVendor(Rec);
-    end;
+    // [EventSubscriber(ObjectType::Table, Database::Vendor, 'OnAfterModifyEvent', '', false, false)]
+    // local procedure CheckDataCo2(var Rec: Record Vendor)
+    // var
+    //     CompanyInfo: Record "Company Information";
+    // begin
+    //     CompanyInfo.Get();
+    //     if CompanyInfo."NP Master Data Company" = false then
+    //         Error('Changes only allowed in the Data Company');
+    // end;
 
-    [EventSubscriber(ObjectType::Table, Database::Vendor, 'OnAfterModifyEvent', '', false, false)]
-    local procedure SendModify(var Rec: Record Vendor)
-    begin
-        CopyVendorData(Rec, CompanyName, false);
-        InsertModPlusVendor(Rec);
-    end;
-
-    [EventSubscriber(ObjectType::Table, Database::Vendor, 'OnBeforeDeleteEvent', '', false, false)]
-    local procedure SendDelete(var Rec: Record Vendor)
-    begin
-        CopyVendorData(Rec, CompanyName, true);
-        InsertModPlusVendor(Rec);
-    end;
+    // [EventSubscriber(ObjectType::Table, Database::Vendor, 'OnBeforeDeleteEvent', '', false, false)]
+    // local procedure SendDelete(var Rec: Record Vendor)
+    // begin
+    //     CopyVendorData(Rec, CompanyName, true);
+    //     InsertModPlusVendor(Rec);
+    // end;
 
     var
         InStr: InStream;
         TempBlob: Codeunit "Temp Blob";
-
 }

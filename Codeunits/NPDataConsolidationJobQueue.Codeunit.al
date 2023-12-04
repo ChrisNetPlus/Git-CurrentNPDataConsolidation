@@ -17,7 +17,7 @@ codeunit 50431 "NP DataConsolidationJobQueue"
                 end;
             'GLAccount':
                 begin
-                    DataConsolidationCU.UpdateGL();
+                    DataConsolidationCU.UpdateGLCode();
                 end;
             'Items':
                 begin

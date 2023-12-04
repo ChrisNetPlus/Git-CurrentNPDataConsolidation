@@ -2,7 +2,7 @@
   "id": "2c9fe188-a199-5ad1-9e1d-a061e8e3df0f",
   "name": "NP Data Consolidation",
   "publisher": "Network Plus",
-  "version": "1.0.0.32",
+  "version": "1.1.0.0",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -28,6 +28,36 @@
       "name": "Daily Tips",
       "version": "1.1.0.6",
       "publisher": "Network Plus"
+    },
+    {
+      "id": "1c7a8786-a409-48a5-af6d-07078329e721",
+      "name": "NetworkPlusGeneralSaaS",
+      "version": "1.0.2.30",
+      "publisher": "Network Plus"
+    },
+    {
+      "id": "2c9fe188-a199-6ad1-9e1d-a061e8e3df0f",
+      "name": "NP VAT Statement Fix",
+      "version": "1.0.0.32",
+      "publisher": "Network Plus"
+    },
+    {
+      "id": "1c7a8786-a409-49a5-af6d-07078329e721",
+      "name": "NetworkPlusApps",
+      "version": "1.1.0.1",
+      "publisher": "Network Plus"
+    },
+    {
+      "id": "3671c58a-cb14-4fd2-848b-0e2895bca302",
+      "name": "NP InspHire",
+      "version": "1.2.0.0",
+      "publisher": "Network Plus"
+    },
+    {
+      "id": "f411b534-4a23-4ac8-be43-e85c4d2b8b9a",
+      "name": "Network Plus General",
+      "version": "1.4.2.21",
+      "publisher": "The NAV People"
     }
   ],
   "screenshots": [],
@@ -39,5 +69,5 @@
       "to": 50460
     }
   ],
-  "runtime": "9.0"
+  "runtime": "12.0"
 }

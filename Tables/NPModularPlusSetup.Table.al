@@ -31,6 +31,31 @@ table 50433 "NP Modular Plus Setup"
                 Commit;
             end;
         }
+        field(5; Customers; Boolean)
+        {
+            Caption = 'Customers';
+            DataClassification = ToBeClassified;
+        }
+        field(6; Vendors; Boolean)
+        {
+            Caption = 'Vendors';
+            DataClassification = ToBeClassified;
+        }
+        field(7; "GL Codes"; Boolean)
+        {
+            Caption = 'GL Codes';
+            DataClassification = ToBeClassified;
+        }
+        field(8; Dimensions; Boolean)
+        {
+            Caption = 'Dimensions';
+            DataClassification = ToBeClassified;
+        }
+        field(9; Items; Boolean)
+        {
+            Caption = 'Items';
+            DataClassification = ToBeClassified;
+        }
     }
     keys
     {

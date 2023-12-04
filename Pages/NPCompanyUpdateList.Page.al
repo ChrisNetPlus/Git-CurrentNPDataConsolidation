@@ -41,12 +41,26 @@ page 50450 "NP Company Update List"
                 Caption = 'Update Vendors';
                 ToolTip = 'Update Vendors in selected companies';
                 Image = Insert;
-
+                Visible = SeeVend;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
                 begin
                     DataConsolidationCU.UpdateVendor();
+                end;
+            }
+            action("Update Vendor Banks")
+            {
+                ApplicationArea = All;
+                Caption = 'Update Vendor Banks';
+                ToolTip = 'Update Vendor Bank Accounts in selected companies';
+                Image = Insert;
+                Visible = SeeVend;
+                trigger OnAction()
+                var
+                    DataConsolidationCU: Codeunit "NP Data Consolidation";
+                begin
+                    DataConsolidationCU.UpdateVendorBank();
                 end;
             }
             action("Update Customers")
@@ -55,7 +69,7 @@ page 50450 "NP Company Update List"
                 Caption = 'Update Customers';
                 ToolTip = 'Update Customers in selected companies';
                 Image = UpdateDescription;
-
+                Visible = SeeCust;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
@@ -69,12 +83,12 @@ page 50450 "NP Company Update List"
                 Caption = 'Update GL Codes';
                 ToolTip = 'Update GL Codes in selected companies';
                 Image = InsertAccount;
-
+                Visible = SeeGL;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
                 begin
-                    DataConsolidationCU.UpdateGL();
+                    DataConsolidationCU.UpdateGLCode();
                 end;
             }
             action("Update Dimensions")
@@ -83,7 +97,7 @@ page 50450 "NP Company Update List"
                 Caption = 'Update Dimension Values';
                 ToolTip = 'Update Dimension Values in selected companies';
                 Image = CopyDimensions;
-
+                Visible = SeeDim;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
@@ -97,12 +111,26 @@ page 50450 "NP Company Update List"
                 Caption = 'Update Items';
                 ToolTip = 'Update Items in selected companies';
                 Image = CopyDimensions;
-
+                Visible = SeeItem;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
                 begin
                     DataConsolidationCU.UpdateItems();
+                end;
+            }
+            action("Mark All Updated")
+            {
+                ApplicationArea = All;
+                Caption = 'Mark All Updated';
+                ToolTip = 'Mark All Updated';
+                Image = UpdateXML;
+
+                trigger OnAction()
+                var
+                    DataConsolidationCU: Codeunit "NP Data Consolidation";
+                begin
+                    DataConsolidationCU.MarkUpdated();
                 end;
             }
         }
@@ -113,6 +141,7 @@ page 50450 "NP Company Update List"
         Company: Record Company;
         CompanyList: Record "NP Company List Update";
     begin
+        ShowActions();
         Company.SetFilter(Name, '<>%1', CompanyName);
         if Company.FindSet() then
             repeat
@@ -138,4 +167,38 @@ page 50450 "NP Company Update List"
             Enabled := true;
         exit(Enabled);
     end;
+
+    local procedure ShowActions()
+    var
+        NPlusSetup: Record "NP Modular Plus Setup";
+    begin
+        NPlusSetup.Get();
+        if NPlusSetup.Customers = true then
+            SeeCust := true
+        else
+            SeeCust := false;
+        if NPlusSetup.Vendors then
+            SeeVend := true
+        else
+            SeeVend := false;
+        if NPlusSetup.Items = true then
+            SeeItem := true
+        else
+            SeeItem := false;
+        if NPlusSetup."GL Codes" = true then
+            SeeGL := true
+        else
+            SeeGL := false;
+        if NPlusSetup.Dimensions = true then
+            SeeDim := true
+        else
+            SeeDim := false;
+    end;
+
+    var
+        SeeVend: Boolean;
+        SeeCust: Boolean;
+        SeeGL: Boolean;
+        SeeItem: Boolean;
+        SeeDim: Boolean;
 }

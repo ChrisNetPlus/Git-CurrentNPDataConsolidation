@@ -1,7 +1,7 @@
 page 50452 "NP Modular Plus Vendors"
 {
     ApplicationArea = All;
-    Caption = 'Modular Plus Vendors';
+    Caption = 'Data Transfer - Vendors';
     PageType = List;
     SourceTable = "NP Modular Plus Vendors";
     UsageCategory = Lists;

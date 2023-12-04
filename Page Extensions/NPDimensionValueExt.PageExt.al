@@ -3,9 +3,13 @@ pageextension 50433 "NP DimensionValueExt" extends "Dimension Values"
     trigger OnModifyRecord(): Boolean
     var
         CompanyInfo: Record "Company Information";
+        NPlusSetup: Record "NP Modular Plus Setup";
         DataConsolCU: Codeunit "NP Data Consolidation";
         ErrorTxt: Label 'Changes can only be applied in the Master Data Company - contact your administrator';
     begin
+        NPlusSetup.Get();
+        if NPlusSetup.Dimensions = false then
+            exit;
         if DataConsolCU.CheckConsolidationEnabled() = 0 then
             exit;
         CompanyInfo.Get();

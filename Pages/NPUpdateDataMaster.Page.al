@@ -101,10 +101,10 @@ page 50453 "NP UpdateDataMaster"
                                 repeat
                                     DataConsolidationCU.ChangeDimensionValue(Workstream);
                                 until Workstream.Next() = 0;
-                            if ContractWorkstream.FindSet() then
-                                repeat
-                                    DataConsolidationCU.ChangeDimensionWorkstreamValue(ContractWorkstream);
-                                until ContractWorkstream.Next() = 0;
+                            // if ContractWorkstream.FindSet() then
+                            //     repeat
+                            //         DataConsolidationCU.ChangeDimensionWorkstreamValue(ContractWorkstream);
+                            //     until ContractWorkstream.Next() = 0;
                         end;
                     end;
                 end;

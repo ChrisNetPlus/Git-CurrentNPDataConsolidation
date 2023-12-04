@@ -14,5 +14,7 @@ permissionset 50430 "NP DataConsolidation"
         page "NP Company Update List" = X,
         page "NP Modular Plus Setup" = X,
         page "NP Modular Plus Vendors" = X,
-        page "NP UpdateDataMaster" = X;
+        page "NP UpdateDataMaster" = X,
+        tabledata "NP Customers" = RIMD,
+        table "NP Customers" = X;
 }

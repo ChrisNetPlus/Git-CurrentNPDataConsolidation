@@ -95,6 +95,55 @@ table 50432 "NP Modular Plus Vendors"
             Caption = 'Deleted';
             DataClassification = SystemMetadata;
         }
+        field(19; "Bank Acc. Code"; Code[20])
+        {
+            Caption = 'Bank Account Code';
+            NotBlank = true;
+        }
+        field(20; "Bank Name"; Text[100])
+        {
+            Caption = 'Bank Name';
+        }
+        field(21; "Bank Branch No."; Text[20])
+        {
+            Caption = 'Bank Branch No.';
+        }
+        field(22; "Bank Account No."; Text[30])
+        {
+            Caption = 'Bank Account No.';
+        }
+        field(23; "AP Contact"; Text[50])
+        {
+            Caption = 'AP Contact';
+        }
+        field(24; NPSCL; Text[50])
+        {
+            Caption = 'NPSCL';
+        }
+        field(25; "Insurance Broker"; Text[100])
+        {
+            Caption = 'Insurance Broker';
+        }
+        field(26; "Value Insured"; Decimal)
+        {
+            Caption = 'Value Insured';
+        }
+        field(27; "Gen. Bus. Posting Group"; Code[20])
+        {
+            Caption = 'Gen. Bus. Posting Group';
+        }
+        field(28; "VAT Bus. Posting Group"; Code[20])
+        {
+            Caption = 'VAT Bus. Posting Group';
+        }
+        field(29; "Vendor Posting Group"; Code[20])
+        {
+            Caption = 'Customer Bus. Posting Group';
+        }
+        field(30; "Payment Terms Code"; Code[20])
+        {
+            Caption = 'Payment Terms Code';
+        }
     }
     keys
     {
