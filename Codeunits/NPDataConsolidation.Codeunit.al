@@ -31,29 +31,48 @@ codeunit 50430 "NP Data Consolidation"
                 Company.Get(CompanyName);
                 if not CompanyInfo."NP Master Data Company" then
                     Error(ErrorTxt);
-                CompanyList.SetRange(Update, true);
-                if CompanyList.FindSet() then
-                    repeat
-                        CompanyCount += 1;
-                        Clear(NewVendor);
-                        NewVendor.ChangeCompany(CompanyList."Company Name");
-                        NewVendor.TransferFields(Vendor);
-                        NewVendor."NP Consolidated" := true;
-                        if not NewVendor.Insert() then
-                            NewVendor.Modify();
-                        VendorBankAccount.SetRange("Vendor No.", Vendor."No.");
-                        if VendorBankAccount.FindFirst() then begin
-                            Clear(NewVendorBankAccount);
-                            NewVendorBankAccount.ChangeCompany(CompanyList."Company Name");
-                            NewVendorBankAccount.TransferFields(VendorBankAccount);
-                            if not NewVendorBankAccount.Insert() then
-                                NewVendorBankAccount.Modify();
-                            UpdateLog(CompanyList."Company Name", 'Vendor Bank', Vendor.Name, 'Update');
-                        end;
-                        UpdateLog(CompanyList."Company Name", 'Vendor', Vendor.Name, 'Update');
-                    Until CompanyList.Next() = 0;
-                Vendor."NP Consolidated" := true;
-                Vendor.Modify();
+                if Vendor."NP Company Name" = '' then begin
+                    CompanyList.SetRange(Update, true);
+                    if CompanyList.FindSet() then
+                        repeat
+                            CompanyCount += 1;
+                            Clear(NewVendor);
+                            NewVendor.ChangeCompany(CompanyList."Company Name");
+                            NewVendor.TransferFields(Vendor);
+                            NewVendor."NP Consolidated" := true;
+                            if not NewVendor.Insert() then
+                                NewVendor.Modify();
+                            VendorBankAccount.SetRange("Vendor No.", Vendor."No.");
+                            if VendorBankAccount.FindFirst() then begin
+                                Clear(NewVendorBankAccount);
+                                NewVendorBankAccount.ChangeCompany(CompanyList."Company Name");
+                                NewVendorBankAccount.TransferFields(VendorBankAccount);
+                                if not NewVendorBankAccount.Insert() then
+                                    NewVendorBankAccount.Modify();
+                                UpdateLog(CompanyList."Company Name", 'Vendor Bank', Vendor.Name, 'Update');
+                            end;
+                            UpdateLog(CompanyList."Company Name", 'Vendor', Vendor.Name, 'Update');
+                        Until CompanyList.Next() = 0;
+                    Vendor."NP Consolidated" := true;
+                    Vendor.Modify();
+                end else begin
+                    NewVendor.ChangeCompany(Vendor."NP Company Name");
+                    NewVendor.TransferFields(Vendor);
+                    NewVendor."NP Consolidated" := true;
+                    if not NewVendor.Insert() then
+                        NewVendor.Modify();
+                    VendorBankAccount.SetRange("Vendor No.", Vendor."No.");
+                    if VendorBankAccount.FindFirst() then begin
+                        Clear(NewVendorBankAccount);
+                        NewVendorBankAccount.ChangeCompany(CompanyList."Company Name");
+                        NewVendorBankAccount.TransferFields(VendorBankAccount);
+                        if not NewVendorBankAccount.Insert() then
+                            NewVendorBankAccount.Modify();
+                        UpdateLog(Vendor."NP Company Name", 'Vendor Bank', Vendor.Name, 'Update');
+                    end;
+                    Vendor."NP Consolidated" := true;
+                    Vendor.Modify();
+                end;
             until Vendor.Next() = 0;
         if GuiAllowed then
             Message(CloseMessage, CompanyCount);
@@ -116,20 +135,33 @@ codeunit 50430 "NP Data Consolidation"
                 Company.Get(CompanyName);
                 if not CompanyInfo."NP Master Data Company" then
                     Error(ErrorTxt);
-                CompanyList.SetRange(Update, true);
-                if CompanyList.FindSet() then
-                    repeat
-                        CompanyCount += 1;
-                        Clear(NewCustomer);
-                        NewCustomer.ChangeCompany(CompanyList."Company Name");
-                        NewCustomer.TransferFields(Customer);
-                        NewCustomer."NP Consolidated" := true;
-                        if not NewCustomer.Insert() then
-                            NewCustomer.Modify();
-                        UpdateLog(CompanyList."Company Name", 'Customer', Customer.Name, 'Update');
-                    Until CompanyList.Next() = 0;
-                Customer."NP Consolidated" := true;
-                Customer.Modify();
+                if Customer."NP Company Name" = '' then begin
+                    CompanyList.SetRange(Update, true);
+                    if CompanyList.FindSet() then
+                        repeat
+                            CompanyCount += 1;
+                            Clear(NewCustomer);
+                            NewCustomer.ChangeCompany(CompanyList."Company Name");
+                            NewCustomer.TransferFields(Customer);
+                            NewCustomer."NP Consolidated" := true;
+                            if not NewCustomer.Insert() then
+                                NewCustomer.Modify();
+                            UpdateLog(CompanyList."Company Name", 'Customer', Customer.Name, 'Update');
+                        Until CompanyList.Next() = 0;
+                    Customer."NP Consolidated" := true;
+                    Customer.Modify();
+                end else begin
+                    CompanyCount += 1;
+                    Clear(NewCustomer);
+                    NewCustomer.ChangeCompany(Customer."NP Company Name");
+                    NewCustomer.TransferFields(Customer);
+                    NewCustomer."NP Consolidated" := true;
+                    if not NewCustomer.Insert() then
+                        NewCustomer.Modify();
+                    UpdateLog(Customer."NP Company Name", 'Customer', Customer.Name, 'Update');
+                    Customer."NP Consolidated" := true;
+                    Customer.Modify();
+                end;
             until Customer.Next() = 0;
         if GuiAllowed then
             Message(CloseMessage, CompanyCount);
@@ -409,6 +441,52 @@ codeunit 50430 "NP Data Consolidation"
         if GuiAllowed then
             Message('Transfer Complete');
         Window.Close();
+    end;
+
+    procedure CreateUpdateVendors()
+    var
+        ModPlusVendor: Record "NP Modular Plus Vendors";
+        Vendor: Record Vendor;
+        VendorBankAcc: Record "Vendor Bank Account";
+    begin
+        ModPlusVendor.Reset();
+        if ModPlusVendor.FindSet() then
+            repeat
+                Vendor.Init();
+                Vendor."No." := ModPlusVendor."Vendor No.";
+                Vendor.Name := ModPlusVendor.Name;
+                Vendor."NP Company Name" := ModPlusVendor.Company;
+                Vendor.Address := ModPlusVendor.Address;
+                Vendor."Address 2" := ModPlusVendor."Address 2";
+                Vendor.City := ModPlusVendor.City;
+                Vendor.County := ModPlusVendor.County;
+                Vendor."Post Code" := ModPlusVendor."Post Code";
+                Vendor."Phone No." := ModPlusVendor."Phone No.";
+                Vendor."Mobile Phone No." := ModPlusVendor."Mobile Phone No.";
+                Vendor."E-Mail" := ModPlusVendor."E-Mail";
+                Vendor."Home Page" := ModPlusVendor."Home Page";
+                Vendor."Primary Contact No." := ModPlusVendor."Primary Contact No.";
+                Vendor."NP Company Registration No." := ModPlusVendor."Company Registration No.";
+                Vendor."NP Supplier Type" := ModPlusVendor."Vendor Type";
+                Vendor."AP Contact" := ModPlusVendor."AP Contact";
+                Vendor."NP NPSCL" := ModPlusVendor.NPSCL;
+                Vendor."NP Insurance Broker" := ModPlusVendor."Insurance Broker";
+                Vendor."NP Value Insured" := ModPlusVendor."Value Insured";
+                Vendor."Gen. Bus. Posting Group" := ModPlusVendor."Gen. Bus. Posting Group";
+                Vendor."VAT Bus. Posting Group" := ModPlusVendor."VAT Bus. Posting Group";
+                Vendor."Vendor Posting Group" := ModPlusVendor."Vendor Posting Group";
+                Vendor."Payment Terms Code" := ModPlusVendor."Payment Terms Code";
+                if not Vendor.Insert() then
+                    Vendor.Modify();
+                VendorBankAcc.Init();
+                VendorBankAcc.Code := ModPlusVendor."Bank Acc. Code";
+                VendorBankAcc.Name := ModPlusVendor."Bank Name";
+                VendorBankAcc."Bank Branch No." := ModPlusVendor."Bank Branch No.";
+                VendorBankAcc."Bank Account No." := ModPlusVendor."Bank Account No.";
+                VendorBankAcc."Vendor No." := ModPlusVendor."Vendor No.";
+                if not VendorBankAcc.Insert() then
+                    VendorBankAcc.Modify();
+            until ModPlusVendor.Next() = 0;
     end;
 
     procedure UpdateCustomers()
