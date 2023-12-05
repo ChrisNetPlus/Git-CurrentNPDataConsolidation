@@ -1,6 +1,6 @@
 table 50434 "NP Customers"
 {
-    Caption = 'Modular Plus Vendors';
+    Caption = 'Modular Plus Customers';
     DataClassification = CustomerContent;
 
     fields
@@ -55,12 +55,12 @@ table 50434 "NP Customers"
             Caption = 'County';
             DataClassification = CustomerContent;
         }
-        field(11; "E-Mail"; Text[50])
+        field(11; "E-Mail"; Text[100])
         {
             Caption = 'E-Mail';
             DataClassification = CustomerContent;
         }
-        field(12; "Home Page"; Text[50])
+        field(12; "Home Page"; Text[100])
         {
             Caption = 'Home Page';
             DataClassification = CustomerContent;
@@ -127,6 +127,12 @@ table 50434 "NP Customers"
         {
             Caption = 'Payment Terms Code';
         }
+        field(28; "Customer Type"; Text[50])
+        {
+            Caption = 'Vendor Type';
+            DataClassification = CustomerContent;
+        }
+
     }
     keys
     {

@@ -1,9 +1,9 @@
-page 50452 "NP Modular Plus Vendors"
+page 50455 "NP Modular Plus Customers"
 {
     ApplicationArea = All;
-    Caption = 'Data Transfer - Vendors';
+    Caption = 'Data Transfer - Customers';
     PageType = List;
-    SourceTable = "NP Modular Plus Vendors";
+    SourceTable = "NP Customers";
     UsageCategory = Lists;
     // Editable = false;
     layout
@@ -18,7 +18,7 @@ page 50452 "NP Modular Plus Vendors"
                     ToolTip = 'Specifies the value of the Company field.';
                     StyleExpr = StyleExprTxt;
                 }
-                field("Vendor No."; Rec."Vendor No.")
+                field("Vendor No."; Rec."Customer No.")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Vendor No. field.';
@@ -108,7 +108,7 @@ page 50452 "NP Modular Plus Vendors"
                     ToolTip = 'Specifies the value of the Company Registration No. field.';
                     StyleExpr = StyleExprTxt;
                 }
-                field("Vendor Type"; Rec."Vendor Type")
+                field("Customer Type"; Rec."Customer Type")
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the value of the Vendor Type field.';
@@ -134,16 +134,16 @@ page 50452 "NP Modular Plus Vendors"
 
                 trigger OnAction()
                 var
-                    Vendor: Record Vendor;
+                    Customer: Record Customer;
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
                     Window: Dialog;
                 begin
                     Window.Open('##1####################');
-                    if Vendor.FindSet() then
+                    if Customer.FindSet() then
                         repeat
-                            Window.Update(1, Vendor."No.");
-                            DataConsolidationCU.CopyVendorData(Vendor, CompanyName, false);
-                        until Vendor.Next() = 0;
+                            Window.Update(1, Customer."No.");
+                            DataConsolidationCU.CopyCustomerData(Customer, CompanyName, false);
+                        until Customer.Next() = 0;
                     Window.Close();
                 end;
             }
@@ -163,7 +163,7 @@ page 50452 "NP Modular Plus Vendors"
                     ConfirmMesssage: Label 'Do you wish to send the update to the Data Master Company?';
                 begin
                     if Confirm(ConfirmMesssage, false) then
-                        DataConsolidationCU.UpdateVendors();
+                        DataConsolidationCU.UpdateCustomers();
                 end;
             }
             action("Create / Update Data Master")
@@ -182,7 +182,7 @@ page 50452 "NP Modular Plus Vendors"
                     ConfirmMesssage: Label 'Do you wish to send the update to the Data Master Company?';
                 begin
                     if Confirm(ConfirmMesssage, false) then
-                        DataConsolidationCU.CreateUpdateVendors();
+                        DataConsolidationCU.CreateCustDataRecords();
                 end;
             }
 
