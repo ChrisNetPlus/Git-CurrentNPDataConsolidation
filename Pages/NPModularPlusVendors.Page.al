@@ -114,6 +114,30 @@ page 50452 "NP Modular Plus Vendors"
                     ToolTip = 'Specifies the value of the Vendor Type field.';
                     StyleExpr = StyleExprTxt;
                 }
+                field("Bank Acc. Code"; Rec."Bank Acc. Code")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Bank Acc. Code field.';
+                    StyleExpr = StyleExprTxt;
+                }
+                field("Bank Account No."; Rec."Bank Account No.")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Bank Acc. No. field.';
+                    StyleExpr = StyleExprTxt;
+                }
+                field("Bank Branch No."; Rec."Bank Branch No.")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Bank Branch No. field.';
+                    StyleExpr = StyleExprTxt;
+                }
+                field("Bank Name"; Rec."Bank Name")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the value of the Bank Name field.';
+                    StyleExpr = StyleExprTxt;
+                }
             }
         }
     }
@@ -176,6 +200,7 @@ page 50452 "NP Modular Plus Vendors"
                 PromotedCategory = Process;
                 PromotedIsBig = true;
                 PromotedOnly = true;
+                Visible = MakeVisible;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
@@ -189,7 +214,15 @@ page 50452 "NP Modular Plus Vendors"
         }
     }
     trigger OnAfterGetRecord()
+    var
+        CompanyInfo: Record "Company Information";
     begin
+        MakeVisible := false;
+        CompanyInfo.Get();
+        if CompanyInfo."NP Master Data Company" then
+            MakeVisible := true
+        else
+            MakeVisible := false;
         If Rec.Deleted then
             StyleExprTxt := 'Unfavorable'
         else
@@ -198,4 +231,5 @@ page 50452 "NP Modular Plus Vendors"
 
     var
         StyleExprTxt: Text;
+        MakeVisible: Boolean;
 }

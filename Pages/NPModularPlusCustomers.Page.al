@@ -176,6 +176,7 @@ page 50455 "NP Modular Plus Customers"
                 PromotedCategory = Process;
                 PromotedIsBig = true;
                 PromotedOnly = true;
+                Visible = MakeVisible;
                 trigger OnAction()
                 var
                     DataConsolidationCU: Codeunit "NP Data Consolidation";
@@ -189,7 +190,15 @@ page 50455 "NP Modular Plus Customers"
         }
     }
     trigger OnAfterGetRecord()
+    var
+        CompanyInfo: Record "Company Information";
     begin
+        MakeVisible := false;
+        CompanyInfo.Get();
+        if CompanyInfo."NP Master Data Company" then
+            MakeVisible := true
+        else
+            MakeVisible := false;
         If Rec.Deleted then
             StyleExprTxt := 'Unfavorable'
         else
@@ -198,4 +207,5 @@ page 50455 "NP Modular Plus Customers"
 
     var
         StyleExprTxt: Text;
+        MakeVisible: Boolean;
 }

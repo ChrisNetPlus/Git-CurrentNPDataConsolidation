@@ -2,7 +2,7 @@
   "id": "2c9fe188-a199-5ad1-9e1d-a061e8e3df0f",
   "name": "NP Data Consolidation",
   "publisher": "Network Plus",
-  "version": "1.1.0.0",
+  "version": "1.1.0.1",
   "brief": "",
   "description": "",
   "privacyStatement": "",
@@ -58,6 +58,12 @@
       "name": "Network Plus General",
       "version": "1.4.2.21",
       "publisher": "The NAV People"
+    },
+    {
+      "id": "c0992c87-ae61-470e-bc5f-277abf345507",
+      "name": "Contract Management",
+      "version": "2.1.0.5",
+      "publisher": "Network Plus"
     }
   ],
   "screenshots": [],

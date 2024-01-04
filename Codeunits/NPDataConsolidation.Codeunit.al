@@ -262,6 +262,8 @@ codeunit 50430 "NP Data Consolidation"
         NewDimValue: Record "Dimension Value";
         ContractWorkstreams: Record "NP Contract Workstreams";
         NewContractWorkstreams: Record "NP Contract Workstreams";
+        ContractInfo: Record "NP Contract Information";
+        NewContractInfo: Record "NP Contract Information";
         ErrorTxt: Label 'This function can only be used in the Master Data Company';
         CloseMessage: Label '%1 records Updated';
         CompanyCount: Integer;
@@ -285,6 +287,14 @@ codeunit 50430 "NP Data Consolidation"
                         NewDimValue."NP Consolidated" := true;
                         if not NewDimValue.Insert() then
                             NewDimValue.Modify();
+                        ContractInfo.Reset();
+                        ContractInfo.SetRange("Contract Code", DimValue.Code);
+                        if ContractInfo.FindFirst() then begin
+                            NewContractInfo.ChangeCompany(CompanyList."Company Name");
+                            NewContractInfo.TransferFields(ContractInfo);
+                            if not NewContractInfo.Insert() then
+                                NewContractInfo.Modify();
+                        end;
                         UpdateLog(CompanyList."Company Name", DimValue."Dimension Code", DimValue.Code, 'Update');
                     Until CompanyList.Next() = 0;
                 DimValue."NP Consolidated" := true;

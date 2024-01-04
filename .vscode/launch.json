@@ -3,11 +3,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Development",
+            "name": "UATv23271123",
             "request": "launch",
             "type": "al",
             "environmentType": "Sandbox",
-            "environmentName": "EG_PRODCOPY_04102023",
+            "environmentName": "UATv23271123",
             "server": "https://businesscentral.dynamics.com/",
             "tenant": "bf9855e5-a08e-4682-a5c1-9a598d191e6b",
             "startupObjectId": 22,
@@ -15,27 +15,7 @@
             "breakOnError": true,
             "launchBrowser": true,
             "enableLongRunningSqlStatements": true,
-            "enableSqlInformationDebugger": true,
-            "forceUpgrade": true,
-            "schemaUpdateMode": "ForceSync"
-        },
-
-        {
-            "name": "Review",
-            "request": "launch",
-            "type": "al",
-            "environmentType": "Sandbox",
-            "environmentName": "NWP_Review",
-            "server": "https://businesscentral.dynamics.com/",
-            "tenant": "bf9855e5-a08e-4682-a5c1-9a598d191e6b",
-            "startupObjectId": 22,
-            "startupObjectType": "Page",
-            "breakOnError": true,
-            "launchBrowser": true,
-            "enableLongRunningSqlStatements": true,
-            "enableSqlInformationDebugger": true,
-            "forceUpgrade": true,
-            "schemaUpdateMode": "ForceSync"
+            "enableSqlInformationDebugger": true
         }
     ]
 }
